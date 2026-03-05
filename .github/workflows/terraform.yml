@@ -7,10 +7,14 @@ on:
     branches:
       - main        # to main branch
       - development # to development branch
+    paths:
+      - 'terraform/**'  # only trigger when terraform files change
   pull_request:
     branches:
       - main        # targeting main
       - development # targeting development
+    paths:
+      - 'terraform/**'  # only trigger when terraform files change
 
 jobs:
   # -------------------------------------------------------
