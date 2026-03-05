@@ -1,0 +1,7 @@
+#!/bin/bash
+
+REPO_NAME="aks-cluster-ci-cd"
+GITHUB_USER=$(gh api user --jq '.login')
+
+gh repo create $REPO_NAME --public --source=. --remote=origin
+echo "🚀 GitHub repository: $REPO_NAME created"
