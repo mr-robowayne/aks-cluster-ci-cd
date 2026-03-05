@@ -9,12 +9,14 @@ on:
       - development # to development branch
     paths:
       - 'terraform/**'  # only trigger when terraform files change
+      - '.github/action-loggs/**'  # only trigger when terraform files change -> for pipeline-testing
   pull_request:
     branches:
       - main        # targeting main
       - development # targeting development
     paths:
       - 'terraform/**'  # only trigger when terraform files change
+      - '.github/action-loggs/**'  # only trigger when terraform files change -> for pipeline-testing
 
 jobs:
   # -------------------------------------------------------
