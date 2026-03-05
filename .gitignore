@@ -7,7 +7,7 @@ tfplan
 
 # Logs
 *.log
-
+!.github/action-loggs/*.log
 # Secrets
 *.tfvars
 !terraform/variables.tfvars
