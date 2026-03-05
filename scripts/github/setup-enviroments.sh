@@ -4,8 +4,8 @@ set -e
 REPO_NAME="aks-cluster-ci-cd"
 SP_NAME="github-actions-filipe"
 GITHUB_USER=$(gh api user --jq '.login')
-$DEV_BRANCH="development"
-$PROD_BRANCH="main"
+DEV_BRANCH="development"
+PROD_BRANCH="main"
 
 
 echo "🔑 Resetting Service Principal credentials..."
@@ -41,7 +41,14 @@ echo "✅ Environments created"
 ## Developtment branch
 gh api repos/$GITHUB_USER/$REPO_NAME/environments/development \
   --method PUT \
-  --field deployment_branch_policy='{"protected_branches":false,"custom_branch_policies":true}'
+  --input - << EOF
+{
+  "deployment_branch_policy": {
+    "protected_branches": false,
+    "custom_branch_policies": true
+  }
+}
+EOF
 
 gh api repos/$GITHUB_USER/$REPO_NAME/environments/development/deployment-branch-policies \
   --method POST \
@@ -50,7 +57,14 @@ gh api repos/$GITHUB_USER/$REPO_NAME/environments/development/deployment-branch-
 #  Main branch
 gh api repos/$GITHUB_USER/$REPO_NAME/environments/production \
   --method PUT \
-  --field deployment_branch_policy='{"protected_branches":false,"custom_branch_policies":true}'
+  --input - << EOF
+{
+  "deployment_branch_policy": {
+    "protected_branches": false,
+    "custom_branch_policies": true
+  }
+}
+EOF
 
 gh api repos/$GITHUB_USER/$REPO_NAME/environments/production/deployment-branch-policies \
   --method POST \
