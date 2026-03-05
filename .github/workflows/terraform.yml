@@ -61,7 +61,7 @@ jobs:
         working-directory: terraform
 
       # Check if code is correctly formatted — fails if not
-      - name: Terraform Format
+      - name: Terraform Check Format
         run: terraform fmt -check -recursive
         working-directory: terraform
 
@@ -115,7 +115,7 @@ jobs:
         working-directory: terraform
         
       # Check if code is correctly formatted — fails if not
-      - name: Terraform Format
+      - name: Terraform Check Format
         run: terraform fmt -check -recursive
         working-directory: terraform
 
