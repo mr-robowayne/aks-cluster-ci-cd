@@ -58,6 +58,7 @@ jobs:
       # Format code correctly 
       - name: Terraform Format
         run: terraform fmt -recursive
+        working-directory: terraform
 
       # Check if code is correctly formatted — fails if not
       - name: Terraform Format
@@ -111,6 +112,7 @@ jobs:
       # Format code correctly 
       - name: Terraform Format
         run: terraform fmt -recursive
+        working-directory: terraform
         
       # Check if code is correctly formatted — fails if not
       - name: Terraform Format
