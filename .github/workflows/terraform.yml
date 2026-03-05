@@ -1,0 +1,122 @@
+# Pipeline name — displayed in GitHub Actions UI
+name: Terraform
+
+# Triggers — when should the pipeline run?
+on:
+  push:
+    branches:
+      - main        # to main branch
+      - development # to development branch
+  pull_request:
+    branches:
+      - main        # targeting main
+      - development # targeting development
+
+jobs:
+  # -------------------------------------------------------
+  # JOB 1: Development — Plan only, no Apply
+  # -------------------------------------------------------
+  terraform-dev:
+    name: Terraform Development
+    runs-on: ubuntu-latest # runs on a GitHub-hosted Ubuntu server
+    environment: development # uses secrets from GitHub Environment "development"
+
+    # This job runs ONLY when:
+    # - a direct push to development happens
+    # - or a PR targeting development is opened
+    if: github.ref == 'refs/heads/development' || (github.event_name == 'pull_request' && github.base_ref == 'development')
+
+    env:
+      # Azure credentials from GitHub Secrets (Settings → Environments → development)
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+    steps:
+      # Download the repository code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Install Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      # Initialize Terraform — connect backend, download modules and providers
+      - name: Terraform Init
+        run: terraform init -backend-config=backend.hcl
+        working-directory: terraform
+
+      # Check if code is correctly formatted — fails if not
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+        working-directory: terraform
+
+      # Validate syntax and configuration
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: terraform
+
+      # Run plan — shows what would change, but does nothing
+      - name: Terraform Plan
+        run: terraform plan -var-file=variables.tfvars
+        working-directory: terraform
+
+  # -------------------------------------------------------
+  # JOB 2: Production — Plan + Apply
+  # -------------------------------------------------------
+  terraform-prod:
+    name: Terraform Production
+    runs-on: ubuntu-latest
+    environment: production # uses secrets from GitHub Environment "production"
+
+    # This job runs ONLY when:
+    # - a direct push to main happens
+    # - or a PR targeting main is opened
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
+
+    env:
+      # Azure credentials from GitHub Secrets (Settings → Environments → production)
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      # Initialize Terraform — connect backend, download modules and providers
+      - name: Terraform Init
+        run: terraform init -backend-config=backend.hcl
+        working-directory: terraform
+
+      # Check if code is correctly formatted — fails if not
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+        working-directory: terraform
+
+      # Validate syntax and configuration
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: terraform
+
+      # Plan with -out=tfplan — saves the plan as a file
+      # ensures Apply runs the exact same plan
+      - name: Terraform Plan
+        run: terraform plan -var-file=variables.tfvars -out=tfplan
+        working-directory: terraform
+
+      # Apply ONLY on direct push (not on PR)
+      # meaning only when actually merged into main
+      - name: Terraform Apply
+        if: github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan
+        working-directory: terraform
