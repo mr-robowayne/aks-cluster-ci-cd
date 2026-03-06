@@ -228,6 +228,13 @@ terraform apply
 `terraform apply` runs **only on push**, not on pull requests.
 
 ---
+# Prepate Github Actions Access 
+Script:
+
+```
+scripts/azure/
+```
+This Script creates add's a Service Principal that we need to Github to have access on Azure
 
 # Setup GitHub Environments
 
@@ -236,8 +243,10 @@ Script:
 ```
 scripts/github/setup-environments.sh
 ```
-
-This script creates the GitHub environments **development** and **production** and configures the following secrets.
+Script Workflow:
+ - resets SP and saves all SP infos required into variables
+ - creates the GitHub environments **development** and **production**
+ - configures Secrets and bind them into the enviroments.
 
 ## development
 
